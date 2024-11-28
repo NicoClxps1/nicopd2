@@ -1,0 +1,115 @@
+@import './base.css';
+
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 2rem;
+  }
+}
+
+/* Estilo del título centrado horizontalmente */
+.title {
+  font-size: 2.5em;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  margin: 20px 0;
+  color: hotpink; /* Color rosa intenso */
+}
+
+/* Botones de selección de almacenamiento */
+.storage-selector button {
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1em;
+  color: black; /* Color de texto en negro */
+  border-radius: 8px; /* Bordes redondeados */
+  transition: all 0.3s ease; /* Transición suave */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para efecto de elevación */
+}
+
+.storage-selector button.active {
+  background-color: #d0e8ff;
+  font-weight: bold;
+  color: black; /* Color de texto en negro */
+}
+
+.storage-selector button:hover {
+  background-color: #e0e0e0;
+  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.15); /* Efecto de sombra al pasar el cursor */
+}
+
+/* Botones de acciones en la parte superior */
+.actions button {
+  flex: 1;
+  padding: 12px 16px;
+  background-color: #007bff;
+  color: black; /* Color de texto en negro */
+  border: none;
+  cursor: pointer;
+  margin: 0 5px;
+  border-radius: 8px; /* Bordes redondeados */
+  font-size: 1em;
+  font-weight: bold;
+  transition: all 0.3s ease; /* Transición suave */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Sombra */
+}
+
+.actions button:hover {
+  background-color: #0056b3; /* Color de fondo al pasar el cursor */
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2); /* Sombra más intensa al pasar el cursor */
+}
+
+/* Botón de envío */
+.send-button {
+  grid-column: 2 / 3;
+  grid-row: 4 / 5;
+  padding: 12px 24px;
+  background-color: #28a745;
+  color: black; /* Color de texto en negro */
+  border: none;
+  cursor: pointer;
+  border-radius: 8px; /* Bordes redondeados */
+  font-size: 1.1em;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.send-button:hover {
+  background-color: #218838; /* Color al pasar el cursor */
+  transform: translateY(-2px); /* Efecto de elevación al pasar el cursor */
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+}
