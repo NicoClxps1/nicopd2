@@ -57,43 +57,60 @@ class CsvController extends Controller
      * @param string $id
      * @return JsonResponse
      */
-    public function show(string $id): JsonResponse
-    {
-        $path = $this->storagePath . $id;
+    /**
+ * Muestra el contenido de un fichero CSV.
+ *
+ * @param string $id
+ * @return JsonResponse
+ */
+public function show(string $id): JsonResponse
+{
+    $path = $this->storagePath . $id;
 
-        // Verificar si el archivo existe
-        if (!Storage::exists($path)) {
-            return response()->json(['mensaje' => 'Fichero no encontrado'], 404);
-        }
-
-        // Obtener contenido del archivo
-        $content = Storage::get($path);
-        $lines = array_map('trim', explode("\n", $content)); // Dividir por líneas y limpiar espacios
-        $lines = array_filter($lines); // Eliminar líneas vacías
-
-        // Si no hay contenido válido, devolver error
-        if (count($lines) < 2) {
-            return response()->json(['mensaje' => 'Fichero vacío o corrupto'], 400);
-        }
-
-        // Extraer la primera fila como cabecera
-        $headers = str_getcsv(array_shift($lines)); // Cabecera como array
-        $data = [];
-
-        // Combinar cada fila con las cabeceras
-        foreach ($lines as $line) {
-            $row = str_getcsv($line); // Parsear fila CSV
-            if (count($row) === count($headers)) {
-                $data[] = array_combine($headers, $row); // Combinar cabeceras y valores
-            }
-        }
-
-        // Devolver respuesta JSON con el contenido procesado
-        return response()->json([
-            'mensaje' => 'Fichero leído con éxito',
-            'contenido' => $data,
-        ]);
+    // Verificar si el archivo existe
+    if (!Storage::exists($path)) {
+        return response()->json(['mensaje' => 'Fichero no encontrado'], 404);
     }
+
+    // Obtener contenido del archivo
+    $content = Storage::get($path);
+    $lines = array_filter(array_map('trim', explode("\n", $content))); // Dividir por líneas y eliminar vacías
+
+    // Si el archivo está vacío, devolver error
+    if (empty($lines)) {
+        return response()->json(['mensaje' => 'Fichero vacío o corrupto'], 400);
+    }
+
+    // Extraer la primera fila como cabecera
+    $headers = str_getcsv(array_shift($lines)); // Cabecera como array
+
+    // Verificar que las cabeceras no estén vacías
+    if (empty($headers)) {
+        return response()->json(['mensaje' => 'Fichero CSV sin cabeceras válidas'], 400);
+    }
+
+    $data = [];
+
+    // Procesar cada línea del archivo
+    foreach ($lines as $line) {
+        $row = str_getcsv($line); // Parsear fila CSV
+        // Verificar que la fila tenga el mismo número de columnas que las cabeceras
+        if (count($row) !== count($headers)) {
+            return response()->json([
+                'mensaje' => 'Fichero CSV con filas que no coinciden con las cabeceras',
+                'linea_invalida' => $line,
+            ], 400);
+        }
+        $data[] = array_combine($headers, $row); // Combinar cabeceras y valores
+    }
+
+    // Devolver respuesta JSON con el contenido procesado
+    return response()->json([
+        'mensaje' => 'Fichero leído con éxito',
+        'contenido' => $data,
+    ]);
+}
+
 
 
 

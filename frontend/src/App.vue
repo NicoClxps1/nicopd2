@@ -8,7 +8,6 @@
         <button @click="selectStorage('class')" :class="{ active: selectedStorage === 'class' }">Class Storage</button>
         <button @click="selectStorage('json')" :class="{ active: selectedStorage === 'json' }">JSON</button>
         <button @click="selectStorage('csv')" :class="{ active: selectedStorage === 'csv' }">CSV</button>
-        <button @click="selectStorage('xml')" :class="{ active: selectedStorage === 'xml' }">XML</button>
       </div>
 
       <!-- Botones de acciones -->
@@ -54,7 +53,7 @@ import axios from "axios";
 export default {
   data() {
     return {
-      selectedStorage: "class",
+      selectedStorage: "class", // Por defecto es "class"
       result: "",
       filename: "",
       fileContent: "",
@@ -67,13 +66,29 @@ export default {
   methods: {
     selectStorage(storage) {
       this.selectedStorage = storage;
+      this.resetInputs();
+    },
+    resetInputs() {
+      this.showInput = false;
+      this.storeInput = false;
+      this.updateInput = false;
+      this.deleteInput = false;
+      this.result = "";
+      this.filename = "";
+      this.fileContent = "";
+    },
+    getApiUrl(action = "", id = "") {
+      // Devuelve la URL dinámica según la clase seleccionada
+      const baseUrls = {
+        class: "http://localhost:8000/api/hello",
+        json: "http://localhost:8000/api/json",
+        csv: "http://localhost:8000/api/csv",
+      };
+      return `${baseUrls[this.selectedStorage]}${id ? `/${id}` : ""}`;
     },
     async getFiles() {
       try {
-        const url = this.selectedStorage === "json"
-          ? "http://localhost:8000/api/json"
-          : "http://localhost:8000/api/hello";
-
+        const url = this.getApiUrl();
         const response = await axios.get(url);
         this.result = JSON.stringify(response.data, null, 2);
       } catch (error) {
@@ -81,12 +96,8 @@ export default {
       }
     },
     prepareShowFile() {
+      this.resetInputs();
       this.showInput = true;
-      this.storeInput = false;
-      this.updateInput = false;
-      this.deleteInput = false;
-      this.result = "";
-      this.filename = "";
     },
     async send() {
       try {
@@ -95,10 +106,7 @@ export default {
           return;
         }
 
-        const url = this.selectedStorage === "json"
-          ? `http://localhost:8000/api/json/${this.filename}`
-          : `http://localhost:8000/api/hello/${this.filename}`;
-
+        const url = this.getApiUrl("", this.filename);
         const response = await axios.get(url);
         this.result = JSON.stringify(response.data, null, 2);
       } catch (error) {
@@ -106,56 +114,36 @@ export default {
       }
     },
     prepareStoreFile() {
+      this.resetInputs();
       this.storeInput = true;
-      this.showInput = false;
-      this.updateInput = false;
-      this.deleteInput = false;
-      this.result = "";
-      this.filename = "";
-      this.fileContent = "";
     },
     async storeFile() {
-    try {
-        // Verifica que el usuario haya ingresado el nombre del archivo y contenido
+      try {
         if (!this.filename || !this.fileContent) {
-            this.result = "Por favor, ingresa el nombre y contenido del archivo.";
-            return;
+          this.result = "Por favor, ingresa el nombre y contenido del archivo.";
+          return;
         }
 
-        // Intenta convertir el contenido ingresado a JSON válido
-        const content = JSON.stringify(JSON.parse(this.fileContent));
+        // En caso de JSON, validamos el contenido
+        const content =
+          this.selectedStorage === "json"
+            ? JSON.stringify(JSON.parse(this.fileContent)) // Validación JSON
+            : this.fileContent; // Para class y csv usamos el texto directo
 
-        // Configura la URL para JSON o Hello según el almacenamiento seleccionado
-        const url =
-            this.selectedStorage === "json"
-                ? "http://localhost:8000/api/json"
-                : "http://localhost:8000/api/hello";
-
-        // Realiza la solicitud POST al servidor
+        const url = this.getApiUrl();
         const response = await axios.post(url, {
-            filename: this.filename,
-            content: content,
+          filename: this.filename,
+          content,
         });
 
-        // Muestra el mensaje de éxito en la interfaz
         this.result = JSON.stringify(response.data, null, 2);
-        this.storeInput = false;
-    } catch (error) {
-        // Muestra el error de la respuesta o un mensaje general
-        this.result = `Error: ${
-            error.response?.data?.mensaje || error.message
-        }`;
-    }
-},
-
+      } catch (error) {
+        this.result = `Error: ${error.response?.status} - ${error.response?.data?.mensaje || error.message}`;
+      }
+    },
     prepareUpdateFile() {
+      this.resetInputs();
       this.updateInput = true;
-      this.storeInput = false;
-      this.showInput = false;
-      this.deleteInput = false;
-      this.result = "";
-      this.filename = "";
-      this.fileContent = "";
     },
     async updateFile() {
       try {
@@ -164,24 +152,16 @@ export default {
           return;
         }
 
-        const url = this.selectedStorage === "json"
-          ? `http://localhost:8000/api/json/${this.filename}`
-          : `http://localhost:8000/api/hello/${this.filename}`;
-
+        const url = this.getApiUrl("", this.filename);
         const response = await axios.put(url, { content: this.fileContent });
         this.result = JSON.stringify(response.data, null, 2);
-        this.updateInput = false;
       } catch (error) {
         this.result = `Error: ${error.response?.status} - ${error.response?.data?.mensaje || error.message}`;
       }
     },
     prepareDeleteFile() {
+      this.resetInputs();
       this.deleteInput = true;
-      this.showInput = false;
-      this.storeInput = false;
-      this.updateInput = false;
-      this.result = "";
-      this.filename = "";
     },
     async deleteFile() {
       try {
@@ -190,13 +170,9 @@ export default {
           return;
         }
 
-        const url = this.selectedStorage === "json"
-          ? `http://localhost:8000/api/json/${this.filename}`
-          : `http://localhost:8000/api/hello/${this.filename}`;
-
+        const url = this.getApiUrl("", this.filename);
         const response = await axios.delete(url);
         this.result = JSON.stringify(response.data, null, 2);
-        this.deleteInput = false;
       } catch (error) {
         this.result = `Error: ${error.response?.status} - ${error.response?.data?.mensaje || error.message}`;
       }
@@ -204,6 +180,8 @@ export default {
   },
 };
 </script>
+
+
 
 <style>
 /* Estilos básicos */
