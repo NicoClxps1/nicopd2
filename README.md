@@ -1,5 +1,4 @@
 Nicolas 
-he hecho el trabajo finalmnete con el poratil de guille, lo intente hacer con ivan y no me funciono te adjunto un video como muestra de mi proyecto.
 
 Ve hasta la carpeta backend desde la terminal y escribe:
 
